@@ -1,0 +1,274 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Practical-machine-learning by MColosso</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header">Practical-machine-learning</h1>
+        <p class="header">Coursera - Johns Hopkins Specialization in Data Science - Practical Machine Learning - Peer Assesments</p>
+
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/MColosso/Practical-Machine-Learning/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/MColosso/Practical-Machine-Learning/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/MColosso/Practical-Machine-Learning">View On GitHub</a></li>
+        </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/MColosso">MColosso</a></p>
+
+
+      </header>
+      <section>
+        <h2>
+<a id="human-activity-recognition" class="anchor" href="#human-activity-recognition" aria-hidden="true"><span class="octicon octicon-link"></span></a>Human Activity Recognition</h2>
+
+<h3>
+<a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction</h3>
+
+<p>Using devices such as <em>Jawbone Up</em>, <em>Nike FuelBand</em>, and <em>Fitbit</em> it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: <a href="http://groupware.les.inf.puc-rio.br/har">http://groupware.les.inf.puc-rio.br/har</a></p>
+
+<h3>
+<a id="objective" class="anchor" href="#objective" aria-hidden="true"><span class="octicon octicon-link"></span></a>Objective</h3>
+
+<p>Develop a machine learning algorithm with the variables content in the training dataset ('pml-training') and how they interact to get the result ("classe"), and apply this algorithm to each of the 20 test cases in the testing dataset ('pml_testing')</p>
+
+<h3>
+<a id="data" class="anchor" href="#data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Data</h3>
+
+<p>The data for this project come from this source: <a href="http://groupware.les.inf.puc-rio.br/har">http://groupware.les.inf.puc-rio.br/har</a>.</p>
+
+<p>The training data for this project are available here: <a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv">pml-training.csv</a>, and the test data are available here: <a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv">pml-testing.csv</a></p>
+
+<div class="highlight highlight-r"><pre>  library(<span class="pl-vo">caret</span>)</pre></div>
+
+<pre><code>## Loading required package: lattice
+## Loading required package: ggplot2
+</code></pre>
+
+<div class="highlight highlight-r"><pre>  set.seed(<span class="pl-c1">1234</span>)
+
+<span class="pl-c">#  download.file(url="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv",</span>
+<span class="pl-c">#                destfile="pml-training.csv", method="internal")</span>
+<span class="pl-c">#  download.file(url="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv",</span>
+<span class="pl-c">#                destfile="pml-testing.csv", method="internal")</span>
+  <span class="pl-vo">pml_training</span> <span class="pl-k">&lt;-</span> read.csv(<span class="pl-s1"><span class="pl-pds">"</span>pml-training.csv<span class="pl-pds">"</span></span>,
+                       <span class="pl-v">na.strings</span><span class="pl-k">=</span>c(<span class="pl-s1"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>, <span class="pl-s1"><span class="pl-pds">"</span>NA<span class="pl-pds">"</span></span>, <span class="pl-s1"><span class="pl-pds">"</span>#DIV/0!<span class="pl-pds">"</span></span>),
+                       <span class="pl-v">stringsAsFactors</span><span class="pl-k">=</span><span class="pl-c1">TRUE</span>)
+  <span class="pl-vo">pml_testing</span>  <span class="pl-k">&lt;-</span> read.csv(<span class="pl-s1"><span class="pl-pds">"</span>pml-testing.csv<span class="pl-pds">"</span></span>,
+                       <span class="pl-v">na.strings</span><span class="pl-k">=</span>c(<span class="pl-s1"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>, <span class="pl-s1"><span class="pl-pds">"</span>NA<span class="pl-pds">"</span></span>, <span class="pl-s1"><span class="pl-pds">"</span>#DIV/0!<span class="pl-pds">"</span></span>),
+                       <span class="pl-v">stringsAsFactors</span><span class="pl-k">=</span><span class="pl-c1">TRUE</span>)</pre></div>
+
+<h4>
+<a id="data-analysis" class="anchor" href="#data-analysis" aria-hidden="true"><span class="octicon octicon-link"></span></a>Data analysis</h4>
+
+<p>First, we divided the training data ('pml-training.csv') in two chunks: training (60% of data) and testing (remaining 40%) for further testing of selected model.</p>
+
+<div class="highlight highlight-r"><pre>  <span class="pl-vo">inTrain</span> <span class="pl-k">&lt;-</span> createDataPartition(<span class="pl-v">y</span><span class="pl-k">=</span><span class="pl-vo">pml_training</span><span class="pl-k">$</span><span class="pl-vo">classe</span>,
+                                 <span class="pl-v">p</span><span class="pl-k">=</span><span class="pl-c1">0.60</span>, <span class="pl-v">list</span><span class="pl-k">=</span><span class="pl-c1">FALSE</span>)
+  <span class="pl-vo">training</span> <span class="pl-k">&lt;-</span> <span class="pl-vo">pml_training</span>[ <span class="pl-vo">inTrain</span>, ]
+  <span class="pl-vo">testing</span>  <span class="pl-k">&lt;-</span> <span class="pl-vo">pml_training</span>[<span class="pl-k">-</span><span class="pl-vo">inTrain</span>, ]
+
+  table(<span class="pl-vo">testing</span><span class="pl-k">$</span><span class="pl-vo">classe</span>)</pre></div>
+
+<pre><code>## 
+##    A    B    C    D    E 
+## 2232 1518 1368 1286 1442
+</code></pre>
+
+<div class="highlight highlight-r"><pre><span class="pl-c">#  head(training)</span>
+<span class="pl-c">#  summary(training)</span></pre></div>
+
+<p>There are 100 variables (of 160) with hign number of missing values (11540+ of 11776 records = 98%)</p>
+
+<div class="highlight highlight-r"><pre>  <span class="pl-vo">NAs</span> <span class="pl-k">&lt;-</span> vector(<span class="pl-v">length</span><span class="pl-k">=</span>ncol(<span class="pl-vo">training</span>))
+  <span class="pl-k">for</span>(<span class="pl-vo">i</span> <span class="pl-k">in</span> <span class="pl-c1">1</span><span class="pl-k">:</span>ncol(<span class="pl-vo">training</span>)) <span class="pl-vo">NAs</span>[<span class="pl-vo">i</span>]<span class="pl-k">&lt;-</span> sum(is.na(<span class="pl-vo">training</span>[, <span class="pl-vo">i</span>]))
+  table(<span class="pl-st">factor</span>(<span class="pl-vo">NAs</span>))</pre></div>
+
+<pre><code>## 
+##     0 11535 11537 11541 11542 11560 11582 11583 11584 11776 
+##    60    69     5     2     5     2     2     7     2     6
+</code></pre>
+
+<div class="highlight highlight-r"><pre>  dim(<span class="pl-vo">training</span>)</pre></div>
+
+<pre><code>## [1] 11776   160
+</code></pre>
+
+<p>Since these variables do not influence the result, we will remove them along with some invariants ('new_window') and descriptive variables ('user_name', for example)</p>
+
+<div class="highlight highlight-r"><pre><span class="pl-c"># Remove columns with NAs</span>
+  <span class="pl-vo">training</span> <span class="pl-k">&lt;-</span> <span class="pl-vo">training</span>[,<span class="pl-k">!</span>sapply(<span class="pl-vo">training</span>,<span class="pl-k">function</span>(<span class="pl-vo">x</span>) any(is.na(<span class="pl-vo">x</span>)))]
+  dim(<span class="pl-vo">training</span>)</pre></div>
+
+<pre><code>## [1] 11776    60
+</code></pre>
+
+<div class="highlight highlight-r"><pre>  <span class="pl-vo">nZvar</span> <span class="pl-k">&lt;-</span> nearZeroVar(<span class="pl-vo">training</span>, <span class="pl-v">saveMetrics</span><span class="pl-k">=</span><span class="pl-c1">TRUE</span>)
+
+  <span class="pl-c"># After removing columns with NAs, there are one with near-zero variance:</span>
+  head(<span class="pl-vo">nZvar</span>[order(<span class="pl-vo">nZvar</span><span class="pl-k">$</span><span class="pl-vo">nzv</span>, <span class="pl-v">decreasing</span><span class="pl-k">=</span><span class="pl-c1">TRUE</span>), ], <span class="pl-v">n</span><span class="pl-k">=</span><span class="pl-c1">5L</span>)</pre></div>
+
+<pre><code>##                      freqRatio percentUnique zeroVar   nzv
+## new_window           47.863071    0.01698370   FALSE  TRUE
+## X                     1.000000  100.00000000   FALSE FALSE
+## user_name             1.066543    0.05095109   FALSE FALSE
+## raw_timestamp_part_1  1.035714    7.09918478   FALSE FALSE
+## raw_timestamp_part_2  1.000000   90.71841033   FALSE FALSE
+</code></pre>
+
+<div class="highlight highlight-r"><pre>  <span class="pl-c"># There are columns that, by their nature, do not influence the resulting value:</span>
+  <span class="pl-c"># raw_timestamp_part_1  raw_timestamp_part_2  cvtd_timestamp</span>
+
+  <span class="pl-c"># Other variables are not related with the resulting:</span>
+  <span class="pl-c"># X                     user_name             new_window            num_window</span>
+
+  <span class="pl-c"># Remove this columns</span>
+  <span class="pl-vo">training</span> <span class="pl-k">&lt;-</span> <span class="pl-vo">training</span>[ , <span class="pl-k">-</span>c(<span class="pl-c1">1</span><span class="pl-k">:</span><span class="pl-c1">7</span>)]   <span class="pl-c"># This variables correspond to the first</span>
+                                     <span class="pl-c"># 7 variables of the dataframe</span></pre></div>
+
+<h4>
+<a id="model-train" class="anchor" href="#model-train" aria-hidden="true"><span class="octicon octicon-link"></span></a>Model Train</h4>
+
+<p>We selected Breiman and Cutler's Random Forest algorithm for prediction due to the accuracy of results.</p>
+
+<p>First, we used the implementation of Random Forest in <code>train()</code> function:</p>
+
+<pre><code>  modelFit &lt;- train(classe ~ ., data=training, method="rf")
+  pred &lt;- predict(modelFit, testing)
+  table(pred, testing$classe)
+
+# pred    A    B    C    D    E
+#    A 2231   14    0    0    0
+#    B    1 1499    7    1    0
+#    C    0    4 1352   10    4
+#    D    0    1    9 1274    2
+#    E    0    0    0    1 1436
+
+</code></pre>
+
+<p>but the processing speed was a real con (more than 4 hours and a half). Finally, we used the <code>randomForest()</code> function of randomForest library:</p>
+
+<div class="highlight highlight-r"><pre>  library(<span class="pl-vo">randomForest</span>)
+
+  <span class="pl-vo">modelFit</span> <span class="pl-k">&lt;-</span> randomForest(<span class="pl-vo">classe</span> <span class="pl-k">~</span> ., <span class="pl-v">data</span><span class="pl-k">=</span><span class="pl-vo">training</span>, <span class="pl-v">importance</span><span class="pl-k">=</span><span class="pl-c1">TRUE</span>)
+  <span class="pl-vo">modelFit</span></pre></div>
+
+<pre><code>## 
+## Call:
+##  randomForest(formula = classe ~ ., data = training, importance = TRUE) 
+##                Type of random forest: classification
+##                      Number of trees: 500
+## No. of variables tried at each split: 7
+## 
+##         OOB estimate of  error rate: 0.59%
+## Confusion matrix:
+##      A    B    C    D    E class.error
+## A 3342    5    0    0    1 0.001792115
+## B   10 2266    3    0    0 0.005704256
+## C    0   19 2031    4    0 0.011197663
+## D    0    0   20 1909    1 0.010880829
+## E    0    0    1    6 2158 0.003233256
+</code></pre>
+
+<div class="highlight highlight-r"><pre>  varImpPlot(<span class="pl-vo">modelFit</span>)   <span class="pl-c"># Show more important variables</span></pre></div>
+
+<p><img src="https://raw.githubusercontent.com/MColosso/Practical-Machine-Learning/master/Human_Activity_Recognition_files/figure-html/Model_train-1.png" alt=""> </p>
+
+<p>with a gain in speed and accuracy.</p>
+
+<h4>
+<a id="model-validation" class="anchor" href="#model-validation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Model Validation</h4>
+
+<div class="highlight highlight-r"><pre>  <span class="pl-vo">pred</span> <span class="pl-k">&lt;-</span> predict(<span class="pl-vo">modelFit</span>, <span class="pl-vo">testing</span>)
+  table(<span class="pl-vo">pred</span>, <span class="pl-vo">testing</span><span class="pl-k">$</span><span class="pl-vo">classe</span>)</pre></div>
+
+<pre><code>##     
+## pred    A    B    C    D    E
+##    A 2229   12    0    0    0
+##    B    3 1503   14    0    0
+##    C    0    3 1350   23    1
+##    D    0    0    4 1260    5
+##    E    0    0    0    3 1436
+</code></pre>
+
+<div class="highlight highlight-r"><pre>  print(confusionMatrix(<span class="pl-vo">pred</span>, <span class="pl-vo">testing</span><span class="pl-k">$</span><span class="pl-vo">classe</span>))</pre></div>
+
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 2229   12    0    0    0
+##          B    3 1503   14    0    0
+##          C    0    3 1350   23    1
+##          D    0    0    4 1260    5
+##          E    0    0    0    3 1436
+## 
+## Overall Statistics
+##                                          
+##                Accuracy : 0.9913         
+##                  95% CI : (0.989, 0.9933)
+##     No Information Rate : 0.2845         
+##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16      
+##                                          
+##                   Kappa : 0.989          
+##  Mcnemar's Test P-Value : NA             
+## 
+## Statistics by Class:
+## 
+##                      Class: A Class: B Class: C Class: D Class: E
+## Sensitivity            0.9987   0.9901   0.9868   0.9798   0.9958
+## Specificity            0.9979   0.9973   0.9958   0.9986   0.9995
+## Pos Pred Value         0.9946   0.9888   0.9804   0.9929   0.9979
+## Neg Pred Value         0.9995   0.9976   0.9972   0.9960   0.9991
+## Prevalence             0.2845   0.1935   0.1744   0.1639   0.1838
+## Detection Rate         0.2841   0.1916   0.1721   0.1606   0.1830
+## Detection Prevalence   0.2856   0.1937   0.1755   0.1617   0.1834
+## Balanced Accuracy      0.9983   0.9937   0.9913   0.9892   0.9977
+</code></pre>
+
+<p>Results show a 99.3% of accuracy in our test dataset.</p>
+
+<h3>
+<a id="test-set-prediction" class="anchor" href="#test-set-prediction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Test Set Prediction</h3>
+
+<p>Apply the machine learning algorithm built to each of the 20 test cases in the testing data set ('pml_testing'):</p>
+
+<div class="highlight highlight-r"><pre>  <span class="pl-vo">answers</span> <span class="pl-k">&lt;-</span> predict(<span class="pl-vo">modelFit</span>, <span class="pl-vo">pml_testing</span>)
+  <span class="pl-vo">answers</span></pre></div>
+
+<pre><code>##  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 
+##  B  A  B  A  A  E  D  B  A  A  B  C  B  A  E  E  A  B  B  B 
+## Levels: A B C D E
+</code></pre>
+
+<p>and generate the answer files</p>
+
+<div class="highlight highlight-r"><pre>  <span class="pl-v">pml_write_files</span> <span class="pl-k">=</span> <span class="pl-k">function</span>(<span class="pl-vo">x</span>){
+    <span class="pl-v">n</span> <span class="pl-k">=</span> length(<span class="pl-vo">x</span>)
+    <span class="pl-k">for</span>(<span class="pl-vo">i</span> <span class="pl-k">in</span> <span class="pl-c1">1</span><span class="pl-k">:</span><span class="pl-vo">n</span>){
+      <span class="pl-v">filename</span> <span class="pl-k">=</span> paste0(<span class="pl-s1"><span class="pl-pds">"</span>problem_id_<span class="pl-pds">"</span></span>,<span class="pl-vo">i</span>,<span class="pl-s1"><span class="pl-pds">"</span>.txt<span class="pl-pds">"</span></span>)
+      write.table(<span class="pl-vo">x</span>[<span class="pl-vo">i</span>],<span class="pl-v">file</span><span class="pl-k">=</span><span class="pl-vo">filename</span>,<span class="pl-v">quote</span><span class="pl-k">=</span><span class="pl-c1">FALSE</span>,<span class="pl-v">row.names</span><span class="pl-k">=</span><span class="pl-c1">FALSE</span>,<span class="pl-v">col.names</span><span class="pl-k">=</span><span class="pl-c1">FALSE</span>)
+    }
+  }
+
+  pml_write_files(as.character(<span class="pl-vo">answers</span>))</pre></div>
+      </section>
+      <footer>
+        <p><small>Hosted on <a href="http://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		
+  </body>
+</html>
